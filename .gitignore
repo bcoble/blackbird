@@ -1,6 +1,4 @@
 #Ignore non source file code
 .classpath
 .project
-/bin
-/.settings
 
