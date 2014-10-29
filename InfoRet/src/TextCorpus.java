@@ -1,8 +1,13 @@
 
-public class JSONObject {
+public class TextCorpus {
 	private String body;
 	private String name;
 	private float score;
+	
+	public TextCorpus(){
+		this.score = 9999;
+	}
+	
 	public String getBody() {
 		return body;
 	}

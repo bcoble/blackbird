@@ -4,12 +4,16 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 
 
 /*
  * Possible run configurations-
- * <query> <score algorithm> <path to corpus directory>
- * abraham 1 C:\Users\coblebj.000\Documents\Courses\AI\blackbird\Presidents
+ * <score algorithm> <path to corpus directory> <query> 
+ * 1 C:\Users\coblebj.000\Documents\Courses\AI\blackbird\Presidents abraham 
  * 
  */
 
@@ -27,15 +31,15 @@ public class InfoRet {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		ArrayList<JSONObject> corpus = new ArrayList<JSONObject>();
+		ArrayList<TextCorpus> corpus = new ArrayList<TextCorpus>();
 
-		if (args.length == 3) {
+		if (args.length >= 3) {
 			String content = null;
-			File dir = new File(args[2]);
+			File dir = new File(args[1]);
 			File[] directoryListing = dir.listFiles();
 			if (directoryListing != null) {
 				for (File child : directoryListing) {
-					JSONObject corpi = new JSONObject();
+					TextCorpus corpi = new TextCorpus();
 					corpi.setName(child.getName());
 					FileReader reader;
 					try {
@@ -66,17 +70,24 @@ public class InfoRet {
 
 		// Switch statements for algorithm type
 
-		ArrayList<JSONObject> results;
-		String query = args[0];
-
-		switch (Integer.valueOf(args[1])) {
+		ArrayList<TextCorpus> results = null;
+		String query = args[2];
+		if(args.length>=4){
+			for(int i=3;i<args.length;i++){
+				query = query + " " + args[i];
+			}
+		}
+		switch (Integer.valueOf(args[0])) {
 		case (1):
 			results = BM25(query, corpus);
-		default:
-			results = BM25(query, corpus);
+		case (2):
+			results = skip_Bi_Gram(query, corpus);
+//		default:
+//			System.out.println("Default");
+//			results = BM25(query, corpus);
 		}
 
-		Collections.sort(results, new JOComparator());		
+		Collections.sort(results, new TCComparator());		
 		
 		printResults(results);
 	}
@@ -85,7 +96,7 @@ public class InfoRet {
 	 * 
 	 * @param results
 	 */
-	private static void printResults(ArrayList<JSONObject> results) {
+	private static void printResults(ArrayList<TextCorpus> results) {
 		for (int i = 0; i < 10; i++) {
 			System.out.println(results.get(i).getName() + " - "
 					+ results.get(i).getScore());
@@ -98,8 +109,8 @@ public class InfoRet {
 	 * @param corpus
 	 * @return corpus with scores
 	 */
-	private static ArrayList<JSONObject> BM25(String query,
-			ArrayList<JSONObject> corpus) {
+	private static ArrayList<TextCorpus> BM25(String query,
+			ArrayList<TextCorpus> corpus) {
 		
 		//TODO - refactor
 		
@@ -110,7 +121,7 @@ public class InfoRet {
 		}
 		avgdl = avgdl/corpus.size();
 		for (int index = 0; index < corpus.size(); index++) {
-			JSONObject corpi = corpus.get(index);
+			TextCorpus corpi = corpus.get(index);
 			float score = 0;
 			int totDoc = corpus.size();
 			int numDocMatch = 0;
@@ -133,4 +144,86 @@ public class InfoRet {
 		return corpus;
 
 	}
+
+	private static ArrayList<TextCorpus> skip_Bi_Gram(String query, ArrayList<TextCorpus> corpus){
+		
+		// Set of SBGs in query
+		Set<String> Q = makeBiGrams(query);
+				
+		// Loop over corpus
+		for(int i=0;i<corpus.size();i++){
+			TextCorpus doc = corpus.get(i);
+			Set<String> P = makeBiGrams(doc.getBody());
+
+			float pScore = 0;
+			float qScore = 0;
+			int intersection = 0;
+			
+			Iterator<String> iter = Q.iterator();
+			String gram = iter.next();
+
+			if (Q.size() == 1){
+				if (P.contains(gram)){
+					intersection++;
+				}
+			} else {
+				while(iter.hasNext()){
+					if (P.contains(gram)){
+						intersection++;
+					}
+					gram = iter.next();
+				}
+			}
+			
+			pScore = intersection / P.size();
+			pScore = intersection > 0 ? pScore+1 : pScore; 
+			qScore = intersection / Q.size();
+						
+			float denom = pScore + qScore;
+			denom = denom == 0 ? 1 : denom;
+						
+			float score = (2 * pScore * qScore) / denom;
+			score = score == 0 ? 9999 : score;
+			corpus.get(i).setScore(score);
+		}
+		
+		return corpus;
+	}
+	
+	/**
+	 * 
+	 * @param input
+	 * @return
+	 */
+	private static Set<String> makeBiGrams(String input){
+		Set<String> results = new HashSet<String>();
+		String[] split = input.split(" ");
+		int size = split.length;
+		
+		if (size > 1){
+			// Bi-gram
+			for(int i=0;i<size;i++){
+				if((i+1) < size){
+					String bgram = split[i] + " " + split[i+1];
+					bgram = bgram.toLowerCase();
+					results.add(bgram);
+				}
+			}
+			
+			// skips
+			for(int i=0;i<size;i++){
+				if((i+2) < size){
+					String sbgram = split[i] + " " + split[i+2];
+					sbgram = sbgram.toLowerCase();
+					results.add(sbgram);
+				}
+			}
+		} else {
+			results.add(input);
+		}
+		return results;
+	}
+
 }
+
+	
