@@ -22,6 +22,16 @@ president,
 assassinated president,
 great president,
 first president,
-civil war president]
+civil war president,
+oil,
+middle east,
+born in Ohio,
+died in office,
+fought in a war,
+world war ii,
+who married theodore roosevelt?,
+who was impeached?,
+what happened in ford's theatre?,
+who was in office during a recession?]
 
 Ten queries of your own choosing, highlighting the benefits and drawbacks of methods 2 - 5.
