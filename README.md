@@ -8,8 +8,8 @@ The Corpus to be processed. The corpus consists of the brief biographies of the 
 ### Requirements ###
 
 Implement the following algorithms and techniques:
-BM25 scoring function
-Cooccurent term extraction such as skip bi-grams or n-grams
+BM25 scoring function,
+Co-occurent term extraction such as skip bi-grams or n-grams,
 Phrase extraction such as passage term matching or textual alignment
 
 ### Tests ###
