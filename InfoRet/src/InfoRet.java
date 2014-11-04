@@ -80,16 +80,13 @@ public class InfoRet {
 		switch (Integer.valueOf(args[0])) {
 		case (1):
 			results = BM25(query, corpus);
+			Collections.sort(results, new TCComparatorA());	// sorts low->high
 		case (2):
 			results = skip_Bi_Gram(query, corpus);
-//		default:
-//			System.out.println("Default");
-//			results = BM25(query, corpus);
+			Collections.sort(results, new TCComparatorB());	// sorts high->low
+		default:
+			printResults(results);
 		}
-
-		Collections.sort(results, new TCComparator());		
-		
-		printResults(results);
 	}
 
 	/**
@@ -162,6 +159,7 @@ public class InfoRet {
 			
 			Iterator<String> iter = Q.iterator();
 			String gram = iter.next();
+
 			if (Q.size() == 1){
 				if (P.contains(gram)){
 					intersection++;
@@ -173,17 +171,23 @@ public class InfoRet {
 					}
 					gram = iter.next();
 				}
+				
+				// Catch the last gram
+				if (P.contains(gram)){
+					intersection++;
+				}
 			}
-			
 			pScore = intersection / P.size();
 			pScore = intersection > 0 ? pScore+1 : pScore; 
 			qScore = intersection / Q.size();
+			qScore = intersection > 0 ? qScore+1 : qScore;
 						
 			float denom = pScore + qScore;
 			denom = denom == 0 ? 1 : denom;
 						
 			float score = (2 * pScore * qScore) / denom;
-			score = score == 0 ? 9999 : score;
+//			System.out.println(intersection+"-"+pScore+"-"+qScore+"-"+denom+"-"+score);
+//			score = score == 0 ? 9999 : score;
 			corpus.get(i).setScore(score);
 		}
 		
