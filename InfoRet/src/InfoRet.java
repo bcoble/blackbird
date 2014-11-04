@@ -272,6 +272,9 @@ public class InfoRet {
 					}
 				}
 				IDF = Math.log10((corpus.size()) / (numDocMatch + 1));
+				if (Double.isNaN(IDF)){
+					IDF = 0;
+				}
 				if(corpus.get(i).getBody().toLowerCase().contains(queryTerms[j].toLowerCase())){
 					matchTot+=IDF;
 				}
