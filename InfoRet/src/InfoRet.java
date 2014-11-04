@@ -153,7 +153,8 @@ public class InfoRet {
 		// Loop over corpus
 		for(int i=0;i<corpus.size();i++){
 			TextCorpus doc = corpus.get(i);
-			Set<String> P = makeBiGrams(doc.getBody());
+			String body = doc.getBody().replaceAll("[^a-zA-Z\\s]", "").replaceAll("\\s+", " ");
+			Set<String> P = makeBiGrams(body);
 
 			float pScore = 0;
 			float qScore = 0;
@@ -161,7 +162,6 @@ public class InfoRet {
 			
 			Iterator<String> iter = Q.iterator();
 			String gram = iter.next();
-
 			if (Q.size() == 1){
 				if (P.contains(gram)){
 					intersection++;
