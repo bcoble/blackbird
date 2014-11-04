@@ -223,6 +223,31 @@ public class InfoRet {
 		}
 		return results;
 	}
+	private static ArrayList<TextCorpus> PassageTerm(String query,
+			ArrayList<TextCorpus> corpus) {
+		String[] queryTerms = query.split(" ");
+		int size = queryTerms.length;
+		for(int i=0;i<corpus.size();i++){
+			int score = 0;
+			int matchTot=0;
+			int tot=0;
+			for(int j=0;j<size;j++){
+				for(int k=0;k<corpus.size();k++){
+					if (corpus.get(k).getBody().toLowerCase().contains(queryTerms[j].toLowerCase())) {
+						numDocMatch++;
+					}
+				}
+				IDF = Math.log10((corpus.size()) / (numDocMatch + 1));
+				if(corpus.get(i).getBody().toLowerCase().contains(queryTerms[j].toLowerCase())){
+					matchTot+=IDF;
+				}
+				tot+=IDF;
+			}
+			score = matchTot/tot;
+			corpus.get(i).setScore(score);
+		}
+		return corpus;
+	}
 
 }
 
