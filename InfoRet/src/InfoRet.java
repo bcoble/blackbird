@@ -126,7 +126,6 @@ public class InfoRet {
 			ArrayList<TextCorpus> corpus) {
 				
 		double avgdl=0;
-//		System.out.println(corpus.size() + "..." + query.split(" ").length);
 		for(int i=0;i<corpus.size();i++){
 			avgdl += corpus.get(i).getBody().split(" ").length;
 		}
@@ -144,10 +143,14 @@ public class InfoRet {
 					}
 				}
 				int frequency = corpi.getBody().toLowerCase().split(query.split(" ")[i].toLowerCase()).length-1;
-//				System.out.println(frequency + " ");
 				IDF = Math.log10((totDoc - numDocMatch + 0.5) / (numDocMatch + 0.5));
 				double k1 = 1.2;
 				double b = .75;
+				
+				// Catch NaN problems in log
+				if (Double.isNaN(IDF)){
+					IDF = 0;
+				}
 				score += IDF * (frequency*k1+1)/(frequency+k1*(1-b+b*corpus.size()/avgdl));
 			}
 			corpus.get(index).setScore(score);
