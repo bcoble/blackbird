@@ -290,7 +290,7 @@ public class InfoRet {
 			if (tot != 0) {
 				score = matchTot / tot;
 			} else {
-				score = 0;
+				score = matchTot;
 			}
 			corpus.get(i).setScore(score);
 		}
