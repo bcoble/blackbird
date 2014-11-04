@@ -77,16 +77,31 @@ public class InfoRet {
 				query = query + " " + args[i];
 			}
 		}
+		
+		// Strip query
+		System.out.println("Query: " + query);
+		query = query.replaceAll("[^a-zA-Z ]","");
+		System.out.println("Query parsed: " + query);
+		
 		switch (Integer.valueOf(args[0])) {
-		case (1):
-			results = BM25(query, corpus);
-			Collections.sort(results, new TCComparatorA());	// sorts low->high
-		case (2):
-			results = skip_Bi_Gram(query, corpus);
-			Collections.sort(results, new TCComparatorB());	// sorts high->low
-		default:
-			printResults(results);
-		}
+			case (1):
+				System.out.println("Performing BM25 method...");
+				results = BM25(query, corpus);
+				Collections.sort(results, new TCComparatorA());	// sorts low->high
+				break;
+			case (2):
+				System.out.println("Performing skip bi-grams method...");
+				results = skip_Bi_Gram(query, corpus);
+				Collections.sort(results, new TCComparatorB());	// sorts high->low
+				break;
+			case(3):
+				System.out.println("Performing passage term method...");
+				results = PassageTerm(query, corpus);
+				Collections.sort(results, new TCComparatorA());
+				break;
+			}
+		
+		printResults(results);
 	}
 
 	/**
@@ -94,8 +109,9 @@ public class InfoRet {
 	 * @param results
 	 */
 	private static void printResults(ArrayList<TextCorpus> results) {
+		System.out.println("Results:");
 		for (int i = 0; i < 10; i++) {
-			System.out.println(results.get(i).getName() + " - "
+			System.out.println((i+1) + ". "+ results.get(i).getName() + " - "
 					+ results.get(i).getScore());
 		}
 	}
@@ -108,9 +124,7 @@ public class InfoRet {
 	 */
 	private static ArrayList<TextCorpus> BM25(String query,
 			ArrayList<TextCorpus> corpus) {
-		
-		//TODO - refactor
-		
+				
 		double avgdl=0;
 //		System.out.println(corpus.size() + "..." + query.split(" ").length);
 		for(int i=0;i<corpus.size();i++){
@@ -142,6 +156,12 @@ public class InfoRet {
 
 	}
 
+	/**
+	 * 
+	 * @param query
+	 * @param corpus
+	 * @return
+	 */
 	private static ArrayList<TextCorpus> skip_Bi_Gram(String query, ArrayList<TextCorpus> corpus){
 		
 		// Set of SBGs in query
@@ -186,9 +206,9 @@ public class InfoRet {
 			denom = denom == 0 ? 1 : denom;
 						
 			float score = (2 * pScore * qScore) / denom;
-//			System.out.println(intersection+"-"+pScore+"-"+qScore+"-"+denom+"-"+score);
-//			score = score == 0 ? 9999 : score;
+//			System.out.println(corpus.get(i).getName()+"-"+intersection+"-"+pScore+"-"+qScore+"-"+denom+"-"+score);
 			corpus.get(i).setScore(score);
+			
 		}
 		
 		return corpus;
@@ -227,13 +247,20 @@ public class InfoRet {
 		}
 		return results;
 	}
-	private static ArrayList<TextCorpus> PassageTerm(String query,
-			ArrayList<TextCorpus> corpus) {
+	/**
+	 * 
+	 * @param query
+	 * @param corpus
+	 * @return
+	 */
+	private static ArrayList<TextCorpus> PassageTerm(String query, ArrayList<TextCorpus> corpus) {
 		String[] queryTerms = query.split(" ");
 		int size = queryTerms.length;
 		for(int i=0;i<corpus.size();i++){
 			int score = 0;
 			int matchTot=0;
+			int numDocMatch = 0;
+			double IDF = 0;
 			int tot=0;
 			for(int j=0;j<size;j++){
 				for(int k=0;k<corpus.size();k++){
